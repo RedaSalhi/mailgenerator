@@ -158,6 +158,7 @@ if page == "Add Contact":
         position = st.text_input("Position", placeholder="Analyst")
         source = st.text_input("Source", placeholder="LinkedIn")
         language = st.selectbox("Language", ["FR", "EN", "ES", "DE", "IT"], index=0)
+        custom_message = st.text_area("Custom Message", placeholder="Interested in M&A opportunities...", height=100)
     
     # Preview email generation
     if first_name and last_name and company:
@@ -180,6 +181,7 @@ if page == "Add Contact":
                     'poste': position,
                     'source': source,
                     'langue': language,
+                    'custom_message': custom_message,
                     'date_added': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 }
                 
@@ -224,9 +226,11 @@ elif page == "View Contacts":
         # Display contacts in a table
         if contacts_to_show:
             df = pd.DataFrame(contacts_to_show)
-            # Reorder columns
-            column_order = ['nom', 'email', 'entreprise', 'poste', 'source', 'langue', 'date_added']
-            df = df[column_order]
+            # Reorder columns to match your CSV structure
+            column_order = ['nom', 'email', 'langue', 'entreprise', 'poste', 'source', 'custom_message', 'date_added']
+            # Only include columns that exist in the data
+            available_columns = [col for col in column_order if col in df.columns]
+            df = df[available_columns]
             
             st.dataframe(
                 df,
@@ -235,10 +239,14 @@ elif page == "View Contacts":
                 column_config={
                     "nom": "Name",
                     "email": "Email",
+                    "langue": "Language",
                     "entreprise": "Company",
                     "poste": "Position",
                     "source": "Source",
-                    "langue": "Language",
+                    "custom_message": st.column_config.TextColumn(
+                        "Custom Message",
+                        width="large"
+                    ),
                     "date_added": st.column_config.DatetimeColumn(
                         "Date Added",
                         format="DD/MM/YYYY HH:mm"
@@ -311,8 +319,11 @@ elif page == "Export/Import":
             # Download as Excel
             if st.button("📊 Download as Excel", type="primary"):
                 df = pd.DataFrame(st.session_state.contacts)
-                column_order = ['nom', 'email', 'entreprise', 'poste', 'source', 'langue', 'date_added']
-                df = df[column_order]
+                # Column order to match your CSV structure exactly
+                column_order = ['nom', 'email', 'langue', 'entreprise', 'poste', 'source', 'custom_message']
+                # Only include columns that exist in the data
+                available_columns = [col for col in column_order if col in df.columns]
+                df = df[available_columns]
                 
                 # Create Excel file in memory
                 output = io.BytesIO()
@@ -332,8 +343,11 @@ elif page == "Export/Import":
             # Download as CSV
             if st.button("📋 Download as CSV"):
                 df = pd.DataFrame(st.session_state.contacts)
-                column_order = ['nom', 'email', 'entreprise', 'poste', 'source', 'langue', 'date_added']
-                df = df[column_order]
+                # Column order to match your CSV structure exactly
+                column_order = ['nom', 'email', 'langue', 'entreprise', 'poste', 'source', 'custom_message']
+                # Only include columns that exist in the data
+                available_columns = [col for col in column_order if col in df.columns]
+                df = df[available_columns]
                 
                 csv_data = df.to_csv(index=False)
                 
@@ -372,7 +386,7 @@ elif page == "Export/Import":
                 # Add to existing contacts
                 for contact in imported_contacts:
                     # Ensure all required fields exist
-                    required_fields = ['nom', 'email', 'entreprise', 'poste', 'source', 'langue']
+                    required_fields = ['nom', 'email', 'langue', 'entreprise', 'poste', 'source', 'custom_message']
                     for field in required_fields:
                         if field not in contact:
                             contact[field] = ""
