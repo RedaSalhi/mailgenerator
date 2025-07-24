@@ -107,7 +107,7 @@ class ProfessionalEmailGenerator:
         
         return email
     
-    def add_contact(self, first_name, last_name, company, position="", source="", language="FR"):
+    def add_contact(self, first_name, last_name, company, position="", source="", language="FR", custom_message=""):
         """Add a contact to the database"""
         try:
             email = self.generate_email(first_name, last_name, company)
@@ -119,6 +119,7 @@ class ProfessionalEmailGenerator:
                 'poste': position,
                 'source': source,
                 'langue': language,
+                'custom_message': custom_message,
                 'date_added': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }
             
@@ -177,15 +178,16 @@ class ProfessionalEmailGenerator:
         
         print(f"\n📊 Contacts Database ({len(contacts)} contacts):")
         print("-" * 100)
-        print(f"{'Name':<20} {'Email':<35} {'Company':<25} {'Position':<15}")
-        print("-" * 100)
+        print(f"{'Name':<20} {'Email':<35} {'Company':<25} {'Position':<15} {'Message':<20}")
+        print("-" * 115)
         
         for contact in contacts:
             name = contact['nom'][:19]
             email = contact['email'][:34]
             company = contact['entreprise'][:24]
             position = contact['poste'][:14]
-            print(f"{name:<20} {email:<35} {company:<25} {position:<15}")
+            message = contact.get('custom_message', '')[:19]
+            print(f"{name:<20} {email:<35} {company:<25} {position:<15} {message:<20}")
     
     def export_to_excel(self, filename=None):
         """Export contacts to Excel file"""
@@ -199,7 +201,7 @@ class ProfessionalEmailGenerator:
         try:
             df = pd.DataFrame(self.contacts)
             # Reorder columns as requested
-            column_order = ['nom', 'email', 'entreprise', 'poste', 'source', 'langue', 'date_added']
+            column_order = ['nom', 'email', 'entreprise', 'poste', 'source', 'langue', 'custom_message', 'date_added']
             df = df[column_order]
             
             df.to_excel(filename, index=False, sheet_name='Contacts')
@@ -250,8 +252,9 @@ def main():
             position = input("Position (optional): ").strip()
             source = input("Source (optional): ").strip()
             language = input("Language (default: FR): ").strip() or "FR"
+            custom_message = input("Custom message (optional): ").strip()
             
-            generator.add_contact(first_name, last_name, company, position, source, language)
+            generator.add_contact(first_name, last_name, company, position, source, language, custom_message)
             
         elif choice == '2':
             generator.display_contacts()
@@ -293,9 +296,9 @@ if __name__ == "__main__":
     generator = ProfessionalEmailGenerator()
     
     # Add some example contacts
-    generator.add_contact("Jean", "Dupont", "BNP Paribas", "Analyst", "LinkedIn", "FR")
-    generator.add_contact("Marie", "Martin", "Goldman Sachs", "VP", "Referral", "EN")
-    generator.add_contact("Pierre", "Dubois", "Société Générale CIB", "Associate", "Company Website", "FR")
+    generator.add_contact("Jean", "Dupont", "BNP Paribas", "Analyst", "LinkedIn", "FR", "Interested in M&A opportunities")
+    generator.add_contact("Marie", "Martin", "Goldman Sachs", "VP", "Referral", "EN", "Follow-up from networking event")
+    generator.add_contact("Pierre", "Dubois", "Société Générale CIB", "Associate", "Company Website", "FR", "Discussing internship possibilities")
     
     # Display contacts
     generator.display_contacts()
