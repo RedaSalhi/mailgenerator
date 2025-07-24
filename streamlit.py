@@ -157,7 +157,7 @@ if page == "Add Contact":
     with col2:
         position = st.text_input("Position", placeholder="Analyst")
         source = st.text_input("Source", placeholder="LinkedIn")
-        language = st.selectbox("Language", ["FR", "EN", "ES", "DE", "IT"], index=0)
+        language = st.selectbox("Language", ["FR", "EN", "ES", "DE", "IT"], index=0).lower()
         custom_message = st.text_area("Custom Message", placeholder="Interested in M&A opportunities...", height=100)
     
     # Preview email generation
@@ -175,18 +175,18 @@ if page == "Add Contact":
                 email = generator.generate_email(first_name, last_name, company)
                 
                 contact = {
-                    'nom': f"{first_name} {last_name}",
+                    'name': f"{first_name} {last_name}",
                     'email': email,
-                    'entreprise': company,
-                    'poste': position,
+                    'company': company,
+                    'position': position,
                     'source': source,
-                    'langue': language,
+                    'language': language,
                     'custom_message': custom_message,
                     'date_added': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 }
                 
                 st.session_state.contacts.append(contact)
-                st.success(f"✅ Contact added: {contact['nom']} - {contact['email']}")
+                st.success(f"✅ Contact added: {contact['name']} - {contact['email']}")
                 
                 # Clear form
                 st.rerun()
@@ -215,8 +215,8 @@ elif page == "View Contacts":
             query = search_query.lower()
             contacts_to_show = [
                 contact for contact in st.session_state.contacts
-                if (query in contact['nom'].lower() or 
-                    query in contact['entreprise'].lower() or 
+                if (query in contact['name'].lower() or 
+                    query in contact['company'].lower() or 
                     query in contact['email'].lower())
             ]
         
@@ -227,7 +227,7 @@ elif page == "View Contacts":
         if contacts_to_show:
             df = pd.DataFrame(contacts_to_show)
             # Reorder columns to match your CSV structure
-            column_order = ['nom', 'email', 'langue', 'entreprise', 'poste', 'source', 'custom_message', 'date_added']
+            column_order = ['name', 'email', 'language', 'company', 'position', 'source', 'custom_message', 'date_added']
             # Only include columns that exist in the data
             available_columns = [col for col in column_order if col in df.columns]
             df = df[available_columns]
@@ -237,11 +237,11 @@ elif page == "View Contacts":
                 use_container_width=True,
                 hide_index=True,
                 column_config={
-                    "nom": "Name",
+                    "name": "Name",
                     "email": "Email",
-                    "langue": "Language",
-                    "entreprise": "Company",
-                    "poste": "Position",
+                    "language": "Language",
+                    "company": "Company",
+                    "position": "Position",
                     "source": "Source",
                     "custom_message": st.column_config.TextColumn(
                         "Custom Message",
@@ -256,16 +256,16 @@ elif page == "View Contacts":
             
             # Delete contacts section
             st.subheader("🗑️ Delete Contact")
-            contact_names = [f"{contact['nom']} ({contact['entreprise']})" for contact in contacts_to_show]
+            contact_names = [f"{contact['name']} ({contact['company']})" for contact in contacts_to_show]
             if contact_names:
                 contact_to_delete = st.selectbox("Select contact to delete:", [""] + contact_names)
                 
                 if contact_to_delete and st.button("🗑️ Delete Contact", type="secondary"):
                     # Find and remove the contact
                     for i, contact in enumerate(st.session_state.contacts):
-                        if f"{contact['nom']} ({contact['entreprise']})" == contact_to_delete:
+                        if f"{contact['name']} ({contact['company']})" == contact_to_delete:
                             deleted_contact = st.session_state.contacts.pop(i)
-                            st.success(f"✅ Deleted: {deleted_contact['nom']}")
+                            st.success(f"✅ Deleted: {deleted_contact['name']}")
                             st.rerun()
                             break
         else:
@@ -320,7 +320,7 @@ elif page == "Export/Import":
             if st.button("📊 Download as Excel", type="primary"):
                 df = pd.DataFrame(st.session_state.contacts)
                 # Column order to match your CSV structure exactly
-                column_order = ['nom', 'email', 'langue', 'entreprise', 'poste', 'source', 'custom_message']
+                column_order = ['name', 'email', 'language', 'company', 'position', 'source', 'custom_message']
                 # Only include columns that exist in the data
                 available_columns = [col for col in column_order if col in df.columns]
                 df = df[available_columns]
@@ -344,7 +344,7 @@ elif page == "Export/Import":
             if st.button("📋 Download as CSV"):
                 df = pd.DataFrame(st.session_state.contacts)
                 # Column order to match your CSV structure exactly
-                column_order = ['nom', 'email', 'langue', 'entreprise', 'poste', 'source', 'custom_message']
+                column_order = ['name', 'email', 'language', 'company', 'position', 'source', 'custom_message']
                 # Only include columns that exist in the data
                 available_columns = [col for col in column_order if col in df.columns]
                 df = df[available_columns]
@@ -386,7 +386,7 @@ elif page == "Export/Import":
                 # Add to existing contacts
                 for contact in imported_contacts:
                     # Ensure all required fields exist
-                    required_fields = ['nom', 'email', 'langue', 'entreprise', 'poste', 'source', 'custom_message']
+                    required_fields = ['name', 'email', 'language', 'company', 'position', 'source', 'custom_message']
                     for field in required_fields:
                         if field not in contact:
                             contact[field] = ""
@@ -417,4 +417,4 @@ elif page == "Export/Import":
 
 # Footer
 st.markdown("---")
-st.markdown("*Professional Email Generator - Built for networking success! 🚀*")
+st.markdown("*Professional Email Generator*")
