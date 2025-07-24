@@ -107,24 +107,24 @@ class ProfessionalEmailGenerator:
         
         return email
     
-    def add_contact(self, first_name, last_name, company, position="", source="", language="FR", custom_message=""):
+    def add_contact(self, first_name, last_name, company, position="", source="", language="fr", custom_message=""):
         """Add a contact to the database"""
         try:
             email = self.generate_email(first_name, last_name, company)
             
             contact = {
-                'nom': f"{first_name} {last_name}",
+                'name': f"{first_name} {last_name}",
                 'email': email,
-                'entreprise': company,
-                'poste': position,
+                'company': company,
+                'position': position,
                 'source': source,
-                'langue': language,
+                'language': language,
                 'custom_message': custom_message,
                 'date_added': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }
             
             self.contacts.append(contact)
-            print(f"✅ Contact added: {contact['nom']} - {contact['email']}")
+            print(f"✅ Contact added: {contact['name']} - {contact['email']}")
             return contact
             
         except ValueError as e:
@@ -160,8 +160,8 @@ class ProfessionalEmailGenerator:
         results = []
         
         for contact in self.contacts:
-            if (query in contact['nom'].lower() or 
-                query in contact['entreprise'].lower() or 
+            if (query in contact['name'].lower() or 
+                query in contact['company'].lower() or 
                 query in contact['email'].lower()):
                 results.append(contact)
         
@@ -182,10 +182,10 @@ class ProfessionalEmailGenerator:
         print("-" * 115)
         
         for contact in contacts:
-            name = contact['nom'][:19]
+            name = contact['name'][:19]
             email = contact['email'][:34]
-            company = contact['entreprise'][:24]
-            position = contact['poste'][:14]
+            company = contact['company'][:24]
+            position = contact['position'][:14]
             message = contact.get('custom_message', '')[:19]
             print(f"{name:<20} {email:<35} {company:<25} {position:<15} {message:<20}")
     
@@ -201,7 +201,7 @@ class ProfessionalEmailGenerator:
         try:
             df = pd.DataFrame(self.contacts)
             # Reorder columns as requested
-            column_order = ['nom', 'email', 'entreprise', 'poste', 'source', 'langue', 'custom_message', 'date_added']
+            column_order = ['name', 'email', 'company', 'position', 'source', 'language', 'custom_message', 'date_added']
             df = df[column_order]
             
             df.to_excel(filename, index=False, sheet_name='Contacts')
@@ -251,7 +251,7 @@ def main():
             company = input("\nCompany name (exact match): ").strip()
             position = input("Position (optional): ").strip()
             source = input("Source (optional): ").strip()
-            language = input("Language (default: FR): ").strip() or "FR"
+            language = input("Language (default: fr): ").strip() or "fr"
             custom_message = input("Custom message (optional): ").strip()
             
             generator.add_contact(first_name, last_name, company, position, source, language, custom_message)
@@ -296,9 +296,9 @@ if __name__ == "__main__":
     generator = ProfessionalEmailGenerator()
     
     # Add some example contacts
-    generator.add_contact("Jean", "Dupont", "BNP Paribas", "Analyst", "LinkedIn", "FR", "Interested in M&A opportunities")
+    generator.add_contact("Jean", "Dupont", "BNP Paribas", "Analyst", "LinkedIn", "fr", "Interested in M&A opportunities")
     generator.add_contact("Marie", "Martin", "Goldman Sachs", "VP", "Referral", "EN", "Follow-up from networking event")
-    generator.add_contact("Pierre", "Dubois", "Société Générale CIB", "Associate", "Company Website", "FR", "Discussing internship possibilities")
+    generator.add_contact("Pierre", "Dubois", "Société Générale CIB", "Associate", "Company Website", "fr", "Discussing internship possibilities")
     
     # Display contacts
     generator.display_contacts()
